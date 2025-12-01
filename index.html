@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math. Discrètes - R1.06</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (Style) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- React & ReactDOM (Via Cloudflare - plus rapide/fiable que unpkg) -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel pour le JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Babel (Pour comprendre le code React) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
 
-    <!-- Styles personnalisés pour l'animation -->
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -24,32 +23,46 @@
         .animate-fadeIn {
             animation: fadeIn 0.5s ease-out forwards;
         }
-        /* Fix pour le scroll mobile fluide */
         .sidebar-scroll {
             -webkit-overflow-scrolling: touch;
+        }
+        /* Style pour la boite d'erreur au cas où */
+        #error-box {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            margin: 20px;
+            border: 1px solid #f87171;
+            border-radius: 8px;
+            font-family: monospace;
         }
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Zone d'affichage des erreurs si l'app ne se lance pas -->
+    <div id="error-box"></div>
+    
+    <!-- L'application React s'affiche ici -->
     <div id="root"></div>
 
-    <script type="text/babel">
+    <!-- Script de gestion d'erreur global -->
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            const box = document.getElementById('error-box');
+            box.style.display = 'block';
+            box.innerHTML = `<strong>Une erreur est survenue :</strong><br>${msg}<br><br>Ligne : ${line}`;
+            return false;
+        };
+    </script>
+
+    <!-- CODE DE L'APPLICATION -->
+    <script type="text/babel" data-presets="env,react">
         const { useState, useEffect } = React;
 
-        // --- ICÔNES (Reconstitution des composants Lucide pour le mode fichier unique) ---
+        // --- ICÔNES SVG ---
         const IconBase = ({ children, className, ...props }) => (
-            <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="24" height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className={className} 
-                {...props}
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
                 {children}
             </svg>
         );
@@ -71,7 +84,7 @@
         const Layers = (props) => <IconBase {...props}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></IconBase>;
         const ArrowRightLeft = (props) => <IconBase {...props}><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/><path d="m8 7-4 4 4 4"/><path d="M4 11h16"/></IconBase>;
 
-        // --- DONNÉES DU COURS (ENRICHIES) ---
+        // --- DONNÉES DU COURS ---
         const courseData = {
           ensembles: {
             title: "1. Ensembles",
@@ -666,8 +679,14 @@
           );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        try {
+          const root = ReactDOM.createRoot(document.getElementById('root'));
+          root.render(<App />);
+        } catch (err) {
+          console.error("Erreur au montage React:", err);
+          document.getElementById('error-box').style.display = 'block';
+          document.getElementById('error-box').innerHTML = "Erreur critique au lancement de l'application : " + err.message;
+        }
     </script>
 </body>
 </html>
